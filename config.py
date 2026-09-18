@@ -10,6 +10,7 @@ MAX_CONTENT_LENGTH = MAX_FILE_SIZE_MB * 1024 * 1024
 MAX_FILE_COUNT = int(os.getenv("MAX_FILE_COUNT", "20"))
 MAX_CONCURRENT_JOBS = int(os.getenv("MAX_CONCURRENT_JOBS", "4"))
 RETENTION_DAYS = int(os.getenv("RETENTION_DAYS", "3"))
+PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL", "").rstrip("/")
 
 JOB_DIR = STORAGE_DIR / "jobs"
 UPLOAD_DIR = STORAGE_DIR / "uploads"

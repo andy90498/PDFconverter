@@ -127,7 +127,7 @@ def status(job_id: str):
 @app.post("/api/jobs/pdf-to-images")
 def create_pdf_to_images_job():
     job_id = make_job()
-    base_url = request.host_url.rstrip("/")
+    base_url = config.PUBLIC_BASE_URL or request.host_url.rstrip("/")
     upload_dir = config.UPLOAD_DIR / job_id
     files = processor.save_uploads(request.files.getlist("files"), upload_dir)
     processor.write_manifest(upload_dir, files)
@@ -148,7 +148,7 @@ def create_pdf_to_images_job():
 @app.post("/api/jobs/merge")
 def create_merge_job():
     job_id = make_job()
-    base_url = request.host_url.rstrip("/")
+    base_url = config.PUBLIC_BASE_URL or request.host_url.rstrip("/")
     upload_dir = config.UPLOAD_DIR / job_id
     files = processor.save_uploads(request.files.getlist("files"), upload_dir)
     processor.write_manifest(upload_dir, files)
@@ -197,7 +197,7 @@ def page_thumbnail(job_id: str, page_number: int):
 @app.post("/api/jobs/pages")
 def create_pages_job():
     payload = request.get_json(force=True)
-    base_url = request.host_url.rstrip("/")
+    base_url = config.PUBLIC_BASE_URL or request.host_url.rstrip("/")
     source_job_id = payload.get("source_job_id")
     selected_pages = payload.get("selected_pages", [])
     mode = payload.get("mode", "keep")
