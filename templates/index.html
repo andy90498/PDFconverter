@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PDF 轉換器</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">PDFconverter</p>
+        <h1>PDF 轉換器</h1>
+        <p>圖片、PDF 互相轉換，支援合併排序與視覺化頁面整理。</p>
+      </div>
+      <div class="limits">
+        <span>單檔 {{ max_file_size }} MB</span>
+        <span>最多 {{ max_file_count }} 個檔案</span>
+      </div>
+    </section>
+
+    <nav class="tabs" aria-label="功能切換">
+      <button class="tab active" data-panel="pdf-images">PDF 轉圖片</button>
+      <button class="tab" data-panel="merge-pdf">合併 PDF</button>
+      <button class="tab" data-panel="page-tools">PDF 頁面整理</button>
+    </nav>
+
+    <section id="pdf-images" class="panel active">
+      <div class="panel-head">
+        <h2>PDF 轉高品質圖片</h2>
+        <p>預設 300 DPI，下載結果會打包成 ZIP。</p>
+      </div>
+      <form id="pdfImagesForm" class="tool-form">
+        <label class="drop-zone">
+          <input type="file" name="files" accept="application/pdf,.pdf" multiple>
+          <span>拖曳 PDF 到這裡，或點選上傳</span>
+        </label>
+        <div class="file-review">
+          <div class="file-review-head">
+            <strong>待轉檔 PDF</strong>
+            <span id="pdfImagesCount">尚未選擇檔案</span>
+          </div>
+          <ol id="pdfImagesList" class="sort-list empty"></ol>
+        </div>
+        <div class="control-grid">
+          <label>
+            圖片格式
+            <select name="image_format">
+              <option value="jpg">JPG 高品質</option>
+              <option value="png">PNG 無損</option>
+            </select>
+          </label>
+          <label class="switch">
+            <input type="checkbox" name="keep_annotations" checked>
+            <span>保留註記 / 塗鴉</span>
+          </label>
+        </div>
+        <button type="submit" class="primary">開始轉換</button>
+      </form>
+    </section>
+
+    <section id="merge-pdf" class="panel">
+      <div class="panel-head">
+        <h2>拖曳排序合併為 PDF</h2>
+        <p>支援 PDF、JPG、PNG，HEIC 會在 Docker 環境中驗證。</p>
+      </div>
+      <form id="mergeForm" class="tool-form">
+        <label class="drop-zone">
+          <input type="file" name="files" accept=".pdf,.jpg,.jpeg,.png,.heic,.heif" multiple>
+          <span>選擇檔案後可拖曳調整順序</span>
+        </label>
+        <div class="file-review">
+          <div class="file-review-head">
+            <strong>合併順序</strong>
+            <span id="mergeCount">尚未選擇檔案</span>
+          </div>
+          <ol id="mergeList" class="sort-list empty"></ol>
+        </div>
+        <label>
+          圖片頁面尺寸
+          <select name="page_mode">
+            <option value="original">原始尺寸</option>
+            <option value="a4_portrait">A4 直式</option>
+            <option value="a4_landscape">A4 橫式</option>
+          </select>
+        </label>
+        <button type="submit" class="primary">合併 PDF</button>
+      </form>
+    </section>
+
+    <section id="page-tools" class="panel">
+      <div class="panel-head">
+        <h2>視覺化頁面擷取與刪除</h2>
+        <p>分批載入縮圖，後端以最終保留頁碼重新組裝。</p>
+      </div>
+      <form id="pageUploadForm" class="tool-form">
+        <label class="drop-zone">
+          <input type="file" name="file" accept="application/pdf,.pdf">
+          <span>上傳單一 PDF 產生縮圖</span>
+        </label>
+        <div id="pageFileSummary" class="single-file empty">尚未選擇檔案</div>
+        <button type="submit" class="primary">載入頁面</button>
+      </form>
+      <div id="pageWorkspace" class="page-workspace hidden">
+        <div class="page-actions">
+          <div class="segmented">
+            <button type="button" class="active" data-mode="keep">保留勾選頁</button>
+            <button type="button" data-mode="delete">刪除勾選頁</button>
+          </div>
+          <button type="button" id="loadMorePages" class="ghost">載入更多頁</button>
+          <button type="button" id="processPages" class="primary">產生 PDF</button>
+        </div>
+        <div id="pageGrid" class="page-grid"></div>
+      </div>
+    </section>
+
+    <section class="progress-card" aria-live="polite">
+      <div class="progress-meta">
+        <span id="progressLabel">準備就緒</span>
+        <span id="progressPercent">0%</span>
+      </div>
+      <div class="progress-track">
+        <div id="progressBar" class="progress-bar"></div>
+      </div>
+    </section>
+  </main>
+
+  <div id="resultModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
+    <section class="result-modal">
+      <button type="button" id="closeResultModal" class="modal-close" aria-label="關閉下載視窗">×</button>
+      <div class="result-copy">
+        <p class="eyebrow">轉檔完成</p>
+        <h2 id="resultTitle">下載結果已準備好</h2>
+        <p id="resultExpiry">有效下載時間：</p>
+        <a id="modalDownloadLink" class="primary modal-download" href="#">下載檔案</a>
+        <a id="modalInfoImageLink" class="ghost modal-download" href="#">下載 QR CODE 與有效時間圖片</a>
+      </div>
+      <div class="qr-panel">
+        <img id="resultQrCode" alt="下載連結 QR CODE">
+        <span>手機掃描下載</span>
+      </div>
+    </section>
+  </div>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

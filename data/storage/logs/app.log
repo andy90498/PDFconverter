@@ -1,0 +1,138 @@
+2026-09-18 22:38:15,025 INFO [werkzeug] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:9013
+ * Running on http://192.168.50.253:9013
+2026-09-18 22:38:15,026 INFO [werkzeug] [33mPress CTRL+C to quit[0m
+2026-09-18 22:38:15,027 INFO [werkzeug]  * Restarting with stat
+2026-09-18 22:38:15,515 WARNING [werkzeug]  * Debugger is active!
+2026-09-18 22:38:15,520 INFO [werkzeug]  * Debugger PIN: 179-849-449
+2026-09-18 22:44:14,420 INFO [werkzeug] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:9013
+ * Running on http://192.168.50.253:9013
+2026-09-18 22:44:14,421 INFO [werkzeug] [33mPress CTRL+C to quit[0m
+2026-09-18 22:44:14,422 INFO [werkzeug]  * Restarting with stat
+2026-09-18 22:44:14,871 WARNING [werkzeug]  * Debugger is active!
+2026-09-18 22:44:14,876 INFO [werkzeug]  * Debugger PIN: 179-849-449
+2026-09-18 22:44:40,946 INFO [werkzeug]  * Detected change in 'E:\\Vermilion的文件\\雜物\\PythonProject\\PDFconverter\\app.py', reloading
+2026-09-18 22:44:40,999 INFO [werkzeug]  * Restarting with stat
+2026-09-18 22:44:41,380 INFO [werkzeug]  * Detected change in 'E:\\Vermilion的文件\\雜物\\PythonProject\\PDFconverter\\app.py', reloading
+2026-09-18 22:44:41,459 WARNING [werkzeug]  * Debugger is active!
+2026-09-18 22:44:41,464 INFO [werkzeug]  * Debugger PIN: 179-849-449
+2026-09-18 22:44:47,593 INFO [werkzeug] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:9014
+ * Running on http://192.168.50.253:9014
+2026-09-18 22:44:47,593 INFO [werkzeug] [33mPress CTRL+C to quit[0m
+2026-09-18 22:44:47,594 INFO [werkzeug]  * Restarting with stat
+2026-09-18 22:44:48,032 WARNING [werkzeug]  * Debugger is active!
+2026-09-18 22:44:48,037 INFO [werkzeug]  * Debugger PIN: 179-849-449
+2026-09-18 22:45:10,407 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 22:45:10] "GET / HTTP/1.1" 200 -
+2026-09-18 22:45:10,604 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 22:45:10] "GET / HTTP/1.1" 200 -
+2026-09-18 22:45:20,764 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 22:45:20] "GET / HTTP/1.1" 200 -
+2026-09-18 22:45:20,918 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 22:45:20] "GET /static/script.js HTTP/1.1" 200 -
+2026-09-18 22:45:20,922 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 22:45:20] "GET /static/style.css HTTP/1.1" 200 -
+2026-09-18 22:45:21,057 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 22:45:21] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-09-18 22:56:05,580 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 22:56:05] "POST /api/jobs/pdf-to-images HTTP/1.1" 200 -
+2026-09-18 22:56:07,093 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 22:56:07] "GET /api/status/7f099971867041b58ebd0dc8199f7b9b HTTP/1.1" 200 -
+2026-09-18 22:56:09,114 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 22:56:09] "GET /download/7c339333490e4cf6bd925e05f6ce5109 HTTP/1.1" 200 -
+2026-09-18 22:58:01,441 ERROR [werkzeug] 192.168.50.253 - - [18/Sep/2026 22:58:01] code 400, message Bad request version ('\x14þä\x13\x00')
+2026-09-18 22:58:01,442 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 22:58:01] "[31m[1m\x16\x03\x01\x07l\x01\x00\x07h\x03\x03\x15'\x08}õ¦bA\x0dQ\x8d ÕJÑà\x19}©K´P*M\x19\x00\x8a\x06®¯q~ 8íÈ{Æ_YB¶Ù\x1e\x85\x00êÕ¼\x9fò¢d\x91º2Ãm\x14\x84\x0d\x14þä\x13\x00 [0m" 400 -
+2026-09-18 22:58:01,445 ERROR [werkzeug] 192.168.50.253 - - [18/Sep/2026 22:58:01] code 400, message Bad request version ('WÙ@\x84\x8fÀ')
+2026-09-18 22:58:01,445 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 22:58:01] "[31m[1m\x16\x03\x01\x07Ì\x01\x00\x07È\x03\x03Ð¢±È\x86+Y1\x9dMÅÓ\x84\x1emÀ\x9ao\x82\x0bq\x09b×"[\x8f ÛOô\x9f ©tÔ¬¾~è\x9eö}\x1aæ\x93èKõ¹ì\x00Ùý\x9fFoùÂÒª_\x13Oð\x00 êê\x13\x01\x13\x02\x13\x03À+À/À,À0Ì©Ì¨À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x07_JJ\x00\x00þ\x0d\x01\x1a\x00\x00\x01\x00\x01¥\x00 !Å?A£èA|X¨\x97ÚÁ\x92\x7fÈaJ¬\x1b0\x16Fà¼z1ä\x8a\x98Ók\x00ðì\x16 Ø(Jéµ+à@7¯\x9eßÓY\x14Ñk\x8b\x83\x15*òrPÃå\x08ýrñÇUvnM\\Q"\x0f5[\x1b\x9dF£nL\x8a\x02Wi\x05òm\x8aSG[ ?Å\x8d7~õ|VW\x8cóX¼\x81\x1eWÙ@\x84\x8fÀ[0m" 400 -
+2026-09-18 22:58:02,759 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 22:58:02] "GET /download/7c339333490e4cf6bd925e05f6ce5109 HTTP/1.1" 200 -
+2026-09-18 23:00:01,148 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:00:01] "GET /download/7c339333490e4cf6bd925e05f6ce5109 HTTP/1.1" 200 -
+2026-09-18 23:02:11,900 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:02:11] "GET / HTTP/1.1" 200 -
+2026-09-18 23:02:11,916 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:02:11] "GET /static/style.css HTTP/1.1" 200 -
+2026-09-18 23:02:11,916 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:02:11] "GET /static/script.js HTTP/1.1" 200 -
+2026-09-18 23:02:29,761 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:02:29] "GET / HTTP/1.1" 200 -
+2026-09-18 23:02:29,821 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:02:29] "GET /static/style.css HTTP/1.1" 200 -
+2026-09-18 23:02:29,825 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:02:29] "GET /static/script.js HTTP/1.1" 200 -
+2026-09-18 23:02:30,024 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:02:30] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-09-18 23:02:41,706 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:02:41] "GET / HTTP/1.1" 200 -
+2026-09-18 23:02:41,766 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:02:41] "GET /static/style.css HTTP/1.1" 200 -
+2026-09-18 23:02:41,769 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:02:41] "GET /static/script.js HTTP/1.1" 200 -
+2026-09-18 23:02:41,973 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:02:41] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-09-18 23:04:33,118 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:04:33] "GET / HTTP/1.1" 200 -
+2026-09-18 23:04:33,204 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:04:33] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-09-18 23:04:33,210 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:04:33] "GET /static/script.js HTTP/1.1" 200 -
+2026-09-18 23:04:35,536 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:04:35] "GET / HTTP/1.1" 200 -
+2026-09-18 23:04:35,596 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:04:35] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-09-18 23:04:35,598 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:04:35] "[36mGET /static/script.js HTTP/1.1[0m" 304 -
+2026-09-18 23:04:54,167 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:04:54] "POST /api/jobs/pdf-to-images HTTP/1.1" 200 -
+2026-09-18 23:04:55,682 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:04:55] "GET /api/status/6fcaca01b5ab4fb0ab1cfed9b0d48fb0 HTTP/1.1" 200 -
+2026-09-18 23:05:04,179 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:05:04] "GET /download/32441607afd248d9b94e0db1a948283a HTTP/1.1" 200 -
+2026-09-18 23:06:42,804 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:06:42] "GET / HTTP/1.1" 200 -
+2026-09-18 23:06:42,881 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:06:42] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-09-18 23:06:42,883 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:06:42] "[36mGET /static/script.js HTTP/1.1[0m" 304 -
+2026-09-18 23:06:47,181 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:06:47] "POST /api/jobs/pdf-to-images HTTP/1.1" 200 -
+2026-09-18 23:06:48,709 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:06:48] "GET /api/status/9236583dfc8a43ebaf0e6505cc62787a HTTP/1.1" 200 -
+2026-09-18 23:06:50,978 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:06:50] "GET /download/0837694b17eb4e02ae66eb0b597f20d2 HTTP/1.1" 200 -
+2026-09-18 23:08:16,737 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:08:16] "GET / HTTP/1.1" 200 -
+2026-09-18 23:08:16,838 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:08:16] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-09-18 23:08:16,854 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:08:16] "[36mGET /static/script.js HTTP/1.1[0m" 304 -
+2026-09-18 23:08:23,451 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:08:23] "POST /api/jobs/pdf-to-images HTTP/1.1" 200 -
+2026-09-18 23:08:24,972 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:08:24] "GET /api/status/a9c63cf522194340b9b51842ebe6d2f7 HTTP/1.1" 200 -
+2026-09-18 23:08:26,404 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:08:26] "GET /download/53bdf1cd8c2e4be798213be3e68c5ec6 HTTP/1.1" 200 -
+2026-09-18 23:08:44,933 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:08:44] "POST /api/jobs/pdf-to-images HTTP/1.1" 200 -
+2026-09-18 23:08:46,454 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:08:46] "GET /api/status/447cebbdebf0402791de405c8adf6ef6 HTTP/1.1" 200 -
+2026-09-18 23:08:48,334 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:08:48] "GET /download/2e7aef7d887943b888cf8dc6e37f5f0f HTTP/1.1" 200 -
+2026-09-18 23:09:19,738 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:09:19] "POST /api/pages/upload HTTP/1.1" 200 -
+2026-09-18 23:09:19,950 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:09:19] "GET /api/pages/401daf5ab5f4428d97dcd8352b4ea142/thumbnail/2 HTTP/1.1" 200 -
+2026-09-18 23:09:19,952 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:09:19] "GET /api/pages/401daf5ab5f4428d97dcd8352b4ea142/thumbnail/3 HTTP/1.1" 200 -
+2026-09-18 23:09:19,954 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:09:19] "GET /api/pages/401daf5ab5f4428d97dcd8352b4ea142/thumbnail/1 HTTP/1.1" 200 -
+2026-09-18 23:09:48,469 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:09:48] "POST /api/pages/upload HTTP/1.1" 200 -
+2026-09-18 23:09:48,687 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:09:48] "GET /api/pages/1ad34891811447108ed772781563a760/thumbnail/2 HTTP/1.1" 200 -
+2026-09-18 23:09:48,688 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:09:48] "GET /api/pages/1ad34891811447108ed772781563a760/thumbnail/1 HTTP/1.1" 200 -
+2026-09-18 23:09:48,691 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:09:48] "GET /api/pages/1ad34891811447108ed772781563a760/thumbnail/3 HTTP/1.1" 200 -
+2026-09-18 23:09:52,786 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:09:52] "POST /api/jobs/pages HTTP/1.1" 200 -
+2026-09-18 23:09:54,308 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:09:54] "GET /api/status/1eb49f3937c543f5955485764bab5ea9 HTTP/1.1" 200 -
+2026-09-18 23:09:55,984 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:09:55] "GET /download/d9ed143dfc9749d3baf7605bea9a8fb7 HTTP/1.1" 200 -
+2026-09-18 23:10:15,855 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:10:15] "POST /api/jobs/pages HTTP/1.1" 200 -
+2026-09-18 23:10:17,369 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:10:17] "GET /api/status/f55401d6ed3e4a11b0d1feb2b0182e0f HTTP/1.1" 200 -
+2026-09-18 23:10:18,791 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:10:18] "GET /download/9f02e328a8a8454d88b8322a3b2e0e0b HTTP/1.1" 200 -
+2026-09-18 23:11:08,086 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:11:08] "POST /api/jobs/merge HTTP/1.1" 200 -
+2026-09-18 23:11:09,603 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:11:09] "GET /api/status/ed4176d270b449ceba92d43a3f8c8bca HTTP/1.1" 200 -
+2026-09-18 23:11:10,528 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:11:10] "GET /download/406f26882a29447e9aaae6535109a421 HTTP/1.1" 200 -
+2026-09-18 23:11:31,868 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:11:31] "POST /api/jobs/merge HTTP/1.1" 200 -
+2026-09-18 23:11:33,388 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:11:33] "GET /api/status/8b3cb8b31e7243449474a3358e899cfd HTTP/1.1" 200 -
+2026-09-18 23:11:34,079 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:11:34] "GET /download/2a21deaaf6ee4986810004fc88a2f902 HTTP/1.1" 200 -
+2026-09-18 23:24:09,138 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:24:09] "GET / HTTP/1.1" 200 -
+2026-09-18 23:24:09,207 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:24:09] "[36mGET /static/style.css HTTP/1.1[0m" 304 -
+2026-09-18 23:24:09,209 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:24:09] "[36mGET /static/script.js HTTP/1.1[0m" 304 -
+2026-09-18 23:24:09,379 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:24:09] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-09-18 23:29:12,115 INFO [werkzeug]  * Detected change in 'E:\\Vermilion的文件\\雜物\\PythonProject\\PDFconverter\\app.py', reloading
+2026-09-18 23:29:12,181 INFO [werkzeug]  * Restarting with stat
+2026-09-18 23:29:12,375 INFO [werkzeug]  * Detected change in 'E:\\Vermilion的文件\\雜物\\PythonProject\\PDFconverter\\app.py', reloading
+2026-09-18 23:29:12,679 WARNING [werkzeug]  * Debugger is active!
+2026-09-18 23:29:12,685 INFO [werkzeug]  * Debugger PIN: 179-849-449
+2026-09-18 23:29:13,698 INFO [werkzeug]  * Detected change in 'E:\\Vermilion的文件\\雜物\\PythonProject\\PDFconverter\\processor.py', reloading
+2026-09-18 23:29:13,777 INFO [werkzeug]  * Restarting with stat
+2026-09-18 23:36:15,067 INFO [werkzeug] [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:9013
+ * Running on http://192.168.50.253:9013
+2026-09-18 23:36:15,067 INFO [werkzeug] [33mPress CTRL+C to quit[0m
+2026-09-18 23:36:15,068 INFO [werkzeug]  * Restarting with stat
+2026-09-18 23:36:15,685 WARNING [werkzeug]  * Debugger is active!
+2026-09-18 23:36:15,688 INFO [werkzeug]  * Debugger PIN: 132-373-497
+2026-09-18 23:36:25,786 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:36:25] "GET / HTTP/1.1" 200 -
+2026-09-18 23:36:25,929 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:36:25] "GET /static/style.css HTTP/1.1" 200 -
+2026-09-18 23:36:25,939 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:36:25] "GET /static/script.js HTTP/1.1" 200 -
+2026-09-18 23:36:26,096 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:36:26] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-09-18 23:36:49,105 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:36:49] "POST /api/jobs/pdf-to-images HTTP/1.1" 200 -
+2026-09-18 23:36:50,632 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:36:50] "GET /api/status/af76c791614e4399bce2ceaf96b23745 HTTP/1.1" 200 -
+2026-09-18 23:36:52,127 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:36:52] "GET /api/status/af76c791614e4399bce2ceaf96b23745 HTTP/1.1" 200 -
+2026-09-18 23:36:53,638 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:36:53] "GET /api/status/af76c791614e4399bce2ceaf96b23745 HTTP/1.1" 200 -
+2026-09-18 23:36:55,116 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:36:55] "GET /api/status/af76c791614e4399bce2ceaf96b23745 HTTP/1.1" 200 -
+2026-09-18 23:36:56,620 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:36:56] "GET /api/status/af76c791614e4399bce2ceaf96b23745 HTTP/1.1" 200 -
+2026-09-18 23:36:58,116 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:36:58] "GET /api/status/af76c791614e4399bce2ceaf96b23745 HTTP/1.1" 200 -
+2026-09-18 23:36:58,132 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:36:58] "GET /download/67e54a7dc0ce4d048ea2c48cc1093a17/qr HTTP/1.1" 200 -
+2026-09-18 23:37:08,853 INFO [werkzeug] 192.168.50.253 - - [18/Sep/2026 23:37:08] "GET /download/67e54a7dc0ce4d048ea2c48cc1093a17/info-image HTTP/1.1" 200 -
+2026-09-18 23:37:46,052 ERROR [werkzeug] 192.168.50.133 - - [18/Sep/2026 23:37:46] code 400, message Bad request version ('\x08\x83\x9ad\x8c\x9b-\x01')
+2026-09-18 23:37:46,052 INFO [werkzeug] 192.168.50.133 - - [18/Sep/2026 23:37:46] "[31m[1m\x16\x03\x01\x07l\x01\x00\x07h\x03\x03\x7f\x1b­\x17±×k\x14{R¬sá/5øÕ\x9a\x1aÅu\x93#¿\x1c Ââ\x81\x09\x06\x04 aD¸ æÌÀý¯,§[©aÚE7Mig\x1et\x1a\x86,f#\x13ZCÎý\x00 úú\x13\x01\x13\x02\x13\x03À+À/À,À0Ì©Ì¨À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x06ÿÊÊ\x00\x00Ê4\x00º\x00¸\x05\x82ß\x13\x02\x0e\x05\x82ß\x13\x02\x0d\x05\x82ß\x13\x02\x01\x04Öy\x09\x06\x08\x83\x9ad\x8c\x9b-\x01\x07\x08\x83\x9ad\x8c\x9b-\x01\x0c\x08\x83\x9ad\x8c\x9b-\x01[0m" 400 -
+2026-09-18 23:37:46,065 ERROR [werkzeug] 192.168.50.133 - - [18/Sep/2026 23:37:46] code 400, message Bad request version ('\x08\x83\x9ad\x8c\x9b-\x01')
+2026-09-18 23:37:46,066 INFO [werkzeug] 192.168.50.133 - - [18/Sep/2026 23:37:46] "[31m[1m\x16\x03\x01\x07Ì\x01\x00\x07È\x03\x03÷~\x10"\x11\x19nõb\x06\x80®Û¶(0¸£b4¾\x0dhL¬xwÏ\x1fäåÕ ³\x08ò¥|í\x0dm\x1cÁ\x91~ü¼\x10elIZî´\x11Ç\x13\x19Xä\x86¸s_r\x00 ÚÚ\x13\x01\x13\x02\x13\x03À+À/À,À0Ì©Ì¨À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x07_êê\x00\x00ÿ\x01\x00\x01\x00\x00\x0b\x00\x02\x01\x00\x00\x12\x00\x00\x12à\x00\x02\x07ÐDÍ\x00\x05\x00\x03\x02h2Ê4\x00º\x00¸\x05\x82ß\x13\x02\x0e\x05\x82ß\x13\x02\x0d\x05\x82ß\x13\x02\x01\x04Öy\x09\x06\x08\x83\x9ad\x8c\x9b-\x01\x07\x08\x83\x9ad\x8c\x9b-\x01\x0c\x08\x83\x9ad\x8c\x9b-\x01[0m" 400 -
+2026-09-18 23:37:47,359 INFO [werkzeug] 192.168.50.133 - - [18/Sep/2026 23:37:47] "GET /download/67e54a7dc0ce4d048ea2c48cc1093a17 HTTP/1.1" 200 -
+2026-09-18 23:37:47,376 INFO [werkzeug] 192.168.50.133 - - [18/Sep/2026 23:37:47] "[35m[1mGET /download/67e54a7dc0ce4d048ea2c48cc1093a17 HTTP/1.1[0m" 206 -
+2026-09-18 23:37:47,382 INFO [werkzeug] 192.168.50.133 - - [18/Sep/2026 23:37:47] "[35m[1mGET /download/67e54a7dc0ce4d048ea2c48cc1093a17 HTTP/1.1[0m" 206 -

@@ -1,0 +1,15 @@
+services:
+  pdfconverter:
+    image: ${PDFCONVERTER_IMAGE}
+    container_name: pdfconverter
+    restart: unless-stopped
+    ports:
+      - "9013:9013"
+    environment:
+      MAX_FILE_SIZE_MB: "150"
+      MAX_FILE_COUNT: "20"
+      MAX_CONCURRENT_JOBS: "4"
+      RETENTION_DAYS: "3"
+      STORAGE_DIR: "/app/storage"
+    volumes:
+      - ./data/storage:/app/storage
