@@ -13,4 +13,7 @@ services:
       RETENTION_DAYS: "3"
       STORAGE_DIR: "/app/storage"
     volumes:
-      - ./data/storage:/app/storage
+      - pdfconverter_storage:/app/storage
+
+volumes:
+  pdfconverter_storage:
