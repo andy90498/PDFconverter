@@ -538,3 +538,16 @@ select {
     justify-content: start;
   }
 }
+
+.footer-credit {
+  display: block;
+  text-align: right;
+  margin-top: 10px;
+  padding-right: 16px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  opacity: 0.5;
+  user-select: none;
+}
