@@ -403,9 +403,7 @@ select {
 }
 
 .footer-credit {
-  display: block;
-  text-align: right;
-  margin-top: 10px;
+  margin-left: auto;
   padding-right: 16px;
   color: var(--muted);
   font-size: 0.75rem;
