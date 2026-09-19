@@ -2,12 +2,19 @@ FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    STORAGE_DIR=/app/storage
+    STORAGE_DIR=/app/storage \
+    TZ=Asia/Taipei
 
 WORKDIR /app
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends libmagic1 libheif-dev \
+    && apt-get install -y --no-install-recommends \
+        libmagic1 \
+        libheif-dev \
+        fonts-noto-cjk \
+        tzdata \
+    && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
+    && echo $TZ > /etc/timezone \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
