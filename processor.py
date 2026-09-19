@@ -183,13 +183,14 @@ def pdf_to_images(
 
     for item in pdf_files:
         doc = fitz.open(item.path)
-        folder = temp_dir / clean_stem(item.original_name)
+        folder_name = Path(item.safe_name).stem  # 改用 safe_name，保證每個檔案唯一
+        folder = temp_dir / folder_name
         folder.mkdir(parents=True, exist_ok=True)
         matrix = fitz.Matrix(300 / 72, 300 / 72)
         for index, page in enumerate(doc, start=1):
             pix = page.get_pixmap(matrix=matrix, alpha=False, annots=keep_annotations)
             ext = "jpg" if fmt == "jpg" else "png"
-            out_path = folder / f"{clean_stem(item.original_name)}_page_{index:03d}.{ext}"
+            out_path = folder / f"{folder_name}_page_{index:03d}.{ext}"
             if fmt == "jpg":
                 pix.pil_save(str(out_path), format="JPEG", quality=98)
             else:
