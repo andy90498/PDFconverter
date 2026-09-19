@@ -4,6 +4,7 @@ import json
 import mimetypes
 import shutil
 import zipfile
+import threading
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -16,6 +17,7 @@ from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
 import config
+_fitz_lock = threading.Lock()
 
 try:
     import magic
@@ -269,16 +271,17 @@ def page_count(pdf_path: Path) -> int:
 
 
 def render_thumbnail(pdf_path: Path, page_number: int, output_path: Path) -> None:
-    doc = fitz.open(pdf_path)
-    if page_number < 1 or page_number > doc.page_count:
+    with _fitz_lock:
+        doc = fitz.open(pdf_path)
+        if page_number < 1 or page_number > doc.page_count:
+            doc.close()
+            raise ProcessingError("頁碼超出範圍")
+        page = doc.load_page(page_number - 1)
+        zoom = 180 / 72
+        pix = page.get_pixmap(matrix=fitz.Matrix(zoom, zoom), alpha=False, annots=True)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        pix.pil_save(str(output_path), format="JPEG", quality=85)
         doc.close()
-        raise ProcessingError("頁碼超出範圍")
-    page = doc.load_page(page_number - 1)
-    zoom = 180 / 72
-    pix = page.get_pixmap(matrix=fitz.Matrix(zoom, zoom), alpha=False, annots=True)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    pix.pil_save(str(output_path), format="JPEG", quality=85)
-    doc.close()
 
 
 def normalize_keep_pages(page_total: int, selected_pages: list[int], mode: str) -> list[int]:

@@ -108,6 +108,7 @@ def too_large(_error):
 
 @app.errorhandler(processor.ProcessingError)
 def processing_error(error):
+    logger.warning("處理錯誤：%s", error)
     return jsonify({"error": str(error)}), 400
 
 
