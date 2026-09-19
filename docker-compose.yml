@@ -14,7 +14,4 @@ services:
       STORAGE_DIR: "/app/storage"
       PUBLIC_BASE_URL: "https://pdf.vermilion1992.com"
     volumes:
-      - pdfconverter_storage:/app/storage
-
-volumes:
-  pdfconverter_storage:
+      - /mnt/nas_docker_data/PDFconverter:/app/storage
