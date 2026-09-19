@@ -339,6 +339,7 @@ document.querySelector("#processPages").addEventListener("click", async () => {
     if (state.selectedPages.size === 0) throw new Error("請至少勾選一頁");
     hideDownload();
     setProgress(2, "正在建立頁面整理任務");
+    const retention = document.querySelector("#pageRetention").value;
     const response = await fetch("/api/jobs/pages", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -346,6 +347,7 @@ document.querySelector("#processPages").addEventListener("click", async () => {
         source_job_id: state.pageJobId,
         selected_pages: Array.from(state.selectedPages),
         mode: state.pageMode,
+        retention: retention,
       }),
     });
     const payload = await response.json();

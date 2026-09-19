@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Callable, Iterable
 
-import fitz
+import pymupdf as fitz
 import qrcode
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 from werkzeug.datastructures import FileStorage
@@ -345,7 +345,10 @@ def create_download_info_image(download_url: str, expires_at: datetime, output_p
     qr_path = output_path.with_name("download_qr.png")
     if not qr_path.exists():
         create_qr_code(download_url, qr_path)
-    qr_image = Image.open(qr_path).resize((360, 360))
+    qr_size = 360
+    qr_x = 500
+    qr_y = 125
+    qr_image = Image.open(qr_path).resize((qr_size, qr_size))
     expires_local = expires_at.astimezone().strftime("%Y-%m-%d %H:%M")
 
     canvas = Image.new("RGB", (920, 560), "#f6fbff")
@@ -356,22 +359,26 @@ def create_download_info_image(download_url: str, expires_at: datetime, output_p
     draw.text((64, 178), "掃描右側 QR CODE，或使用下方連結下載。", fill="#617084", font=_font(24))
 
     link_font = _font(21)
+    text_start_x = 64
+    max_text_width = qr_x - text_start_x - 20  # 保留 20px 間距，避免蓋到 QR CODE
     wrapped = []
     current = ""
     for char in download_url:
         trial = current + char
-        if draw.textlength(trial, font=link_font) > 470:
+        if draw.textlength(trial, font=link_font) > max_text_width:
             wrapped.append(current)
             current = char
         else:
             current = trial
     if current:
         wrapped.append(current)
+
     y = 245
-    for line in wrapped[:4]:
-        draw.text((64, y), line, fill="#0f8bff", font=link_font)
+    max_lines = 6  # 寬度變窄，多留幾行避免網址被截斷
+    for line in wrapped[:max_lines]:
+        draw.text((text_start_x, y), line, fill="#0f8bff", font=link_font)
         y += 30
 
-    canvas.paste(qr_image, (500, 125))
+    canvas.paste(qr_image, (qr_x, qr_y))
     output_path.parent.mkdir(parents=True, exist_ok=True)
     canvas.save(output_path)

@@ -69,7 +69,7 @@ def _cleanup_loop() -> None:
             pass
         except Exception:
             logger.exception("背景清理排程失敗")
-        time.sleep(3600)
+        time.sleep(43200)
 
 
 def start_cleanup_scheduler() -> None:

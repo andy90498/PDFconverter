@@ -73,13 +73,13 @@ def run_job(job_id: str, worker) -> None:
         write_status(job_id, status="failed", progress=100, message=str(exc))
 
 
-def result_payload(job_id: str, output_path: Path, filename: str, base_url: str) -> dict[str, str]:
+def result_payload(job_id: str, output_path: Path, filename: str, base_url: str, retention_seconds: int) -> dict[str, str]:
     token = uuid.uuid4().hex
     token_path = config.RESULT_DIR / token
     token_path.mkdir(parents=True, exist_ok=True)
     target = token_path / filename
     output_path.replace(target)
-    expires_at = datetime.now(timezone.utc) + timedelta(days=config.RETENTION_DAYS)
+    expires_at = datetime.now(timezone.utc) + timedelta(seconds=retention_seconds)
     download_url = f"{base_url}/download/{token}"
     qr_path = token_path / "download_qr.png"
     info_path = token_path / "download_info.png"
@@ -100,6 +100,9 @@ def result_payload(job_id: str, output_path: Path, filename: str, base_url: str)
     )
     return {"token": token, "filename": filename}
 
+def resolve_retention_seconds(raw_value: str | None) -> int:
+    key = raw_value if raw_value in config.RETENTION_OPTIONS else config.DEFAULT_RETENTION_KEY
+    return config.RETENTION_OPTIONS[key]
 
 @app.errorhandler(RequestEntityTooLarge)
 def too_large(_error):
@@ -130,6 +133,7 @@ def create_pdf_to_images_job():
     job_id = make_job()
     base_url = config.PUBLIC_BASE_URL or request.host_url.rstrip("/")
     upload_dir = config.UPLOAD_DIR / job_id
+    retention_seconds = resolve_retention_seconds(request.form.get("retention"))
     files = processor.save_uploads(request.files.getlist("files"), upload_dir)
     processor.write_manifest(upload_dir, files)
     image_format = request.form.get("image_format", "jpg")
@@ -139,7 +143,7 @@ def create_pdf_to_images_job():
         stored = processor.load_manifest(upload_dir)
         out = job_path(job_id) / "pdf_images.zip"
         processor.pdf_to_images(stored, out, image_format, keep_annotations, progress)
-        result_payload(job_id, out, "pdf_images.zip", base_url)
+        result_payload(job_id, out, "pdf_images.zip", base_url, retention_seconds)
         processor.remove_original_uploads(upload_dir)
 
     executor.submit(run_job, job_id, worker)
@@ -151,6 +155,7 @@ def create_merge_job():
     job_id = make_job()
     base_url = config.PUBLIC_BASE_URL or request.host_url.rstrip("/")
     upload_dir = config.UPLOAD_DIR / job_id
+    retention_seconds = resolve_retention_seconds(request.form.get("retention"))
     files = processor.save_uploads(request.files.getlist("files"), upload_dir)
     processor.write_manifest(upload_dir, files)
     order = [int(index) for index in json.loads(request.form.get("order", "[]"))]
@@ -160,7 +165,7 @@ def create_merge_job():
         stored = processor.load_manifest(upload_dir)
         out = job_path(job_id) / "merged.pdf"
         processor.merge_files_to_pdf(stored, order, out, page_mode, progress)
-        result_payload(job_id, out, "merged.pdf", base_url)
+        result_payload(job_id, out, "merged.pdf", base_url, retention_seconds)
         processor.remove_original_uploads(upload_dir)
 
     executor.submit(run_job, job_id, worker)
@@ -199,6 +204,7 @@ def page_thumbnail(job_id: str, page_number: int):
 def create_pages_job():
     payload = request.get_json(force=True)
     base_url = config.PUBLIC_BASE_URL or request.host_url.rstrip("/")
+    retention_seconds = resolve_retention_seconds(payload.get("retention"))
     source_job_id = payload.get("source_job_id")
     selected_pages = payload.get("selected_pages", [])
     mode = payload.get("mode", "keep")
@@ -212,7 +218,7 @@ def create_pages_job():
         stored = processor.load_manifest(source_upload_dir)
         out = job_path(job_id) / "pages.pdf"
         processor.extract_pdf_pages(stored[0].path, out, [int(page) for page in selected_pages], mode, progress)
-        result_payload(job_id, out, "pages.pdf", base_url)
+        result_payload(job_id, out, "pages.pdf", base_url, retention_seconds)
 
     executor.submit(run_job, job_id, worker)
     return jsonify({"job_id": job_id})
@@ -226,7 +232,13 @@ def download(token: str):
     meta_path = token_dir / "result.json"
     if not meta_path.exists():
         return jsonify({"error": "找不到下載檔案"}), 404
-    filename = json.loads(meta_path.read_text(encoding="utf-8"))["filename"]
+    meta = json.loads(meta_path.read_text(encoding="utf-8"))
+
+    expires_at = datetime.fromisoformat(meta["expires_at"])
+    if expires_at < datetime.now(timezone.utc):
+        return jsonify({"error": "下載連結已過期"}), 404
+
+    filename = meta["filename"]
     result_file = token_dir / filename
     if not result_file.exists():
         return jsonify({"error": "找不到下載檔案"}), 404

@@ -9,7 +9,18 @@ MAX_FILE_SIZE_MB = int(os.getenv("MAX_FILE_SIZE_MB", "150"))
 MAX_CONTENT_LENGTH = MAX_FILE_SIZE_MB * 1024 * 1024
 MAX_FILE_COUNT = int(os.getenv("MAX_FILE_COUNT", "20"))
 MAX_CONCURRENT_JOBS = int(os.getenv("MAX_CONCURRENT_JOBS", "4"))
-RETENTION_DAYS = int(os.getenv("RETENTION_DAYS", "3"))
+RETENTION_DAYS = int(os.getenv("RETENTION_DAYS", "3"))  # 保留：給 JOB_DIR/UPLOAD_DIR 暫存清理用
+
+RETENTION_OPTIONS = {
+    "30m": 30 * 60,
+    "1h": 60 * 60,
+    "3h": 3 * 60 * 60,
+    "12h": 12 * 60 * 60,
+    "24h": 24 * 60 * 60,
+    "48h": 48 * 60 * 60,
+    "72h": 72 * 60 * 60,
+}
+DEFAULT_RETENTION_KEY = "72h"
 PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL", "").rstrip("/")
 
 JOB_DIR = STORAGE_DIR / "jobs"
@@ -28,6 +39,7 @@ ALLOWED_MIME_TYPES = {
     "image/heic",
     "image/heif",
 }
+
 
 
 def ensure_storage_dirs() -> None:
