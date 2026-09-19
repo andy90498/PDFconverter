@@ -110,9 +110,14 @@ def save_uploads(files: Iterable[FileStorage], job_upload_dir: Path) -> list[Sto
             continue
         if len(stored_files) >= config.MAX_FILE_COUNT:
             raise ProcessingError(f"一次最多只能上傳 {config.MAX_FILE_COUNT} 個檔案")
-        safe_name = secure_filename(uploaded.filename)
-        if not safe_name:
-            raise ProcessingError("檔名無效")
+
+        original_ext = Path(uploaded.filename).suffix.lower()
+        if original_ext not in config.ALLOWED_EXTENSIONS:
+            raise ProcessingError(f"不支援的副檔名：{original_ext}")
+
+        stem = clean_stem(uploaded.filename)
+        safe_name = f"{stem}{original_ext}"
+
         target = unique_path(job_upload_dir, safe_name)
         uploaded.save(target)
         mime_type = validate_uploaded_file(target)
