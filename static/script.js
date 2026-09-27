@@ -81,6 +81,14 @@ function createFileManager({ input, list, count, sortable }) {
       : "尚未選擇檔案";
   }
 
+  function moveFile(fromIndex, toIndex) {
+    if (toIndex < 0 || toIndex >= files.length || fromIndex === toIndex) return;
+    const [file] = files.splice(fromIndex, 1);
+    files.splice(toIndex, 0, file);
+    syncInput();
+    render();
+  }
+
   function render() {
     list.innerHTML = "";
     list.classList.toggle("empty", files.length === 0);
@@ -92,6 +100,9 @@ function createFileManager({ input, list, count, sortable }) {
       const main = document.createElement("span");
       const name = document.createElement("span");
       const size = document.createElement("span");
+      const actions = document.createElement("span");
+      const moveUp = document.createElement("button");
+      const moveDown = document.createElement("button");
       const remove = document.createElement("button");
 
       position.textContent = String(index + 1);
@@ -100,6 +111,19 @@ function createFileManager({ input, list, count, sortable }) {
       name.textContent = file.name;
       size.className = "file-size";
       size.textContent = formatFileSize(file.size);
+      actions.className = "file-actions";
+      moveUp.type = "button";
+      moveUp.className = "move-file";
+      moveUp.textContent = "↑";
+      moveUp.title = `將 ${file.name} 上移`;
+      moveUp.setAttribute("aria-label", `將 ${file.name} 上移`);
+      moveUp.disabled = index === 0;
+      moveDown.type = "button";
+      moveDown.className = "move-file";
+      moveDown.textContent = "↓";
+      moveDown.title = `將 ${file.name} 下移`;
+      moveDown.setAttribute("aria-label", `將 ${file.name} 下移`);
+      moveDown.disabled = index === files.length - 1;
       remove.type = "button";
       remove.className = "remove-file";
       remove.title = `移除 ${file.name}`;
@@ -107,7 +131,10 @@ function createFileManager({ input, list, count, sortable }) {
       remove.textContent = "×";
 
       main.append(name, size);
-      item.append(position, main, remove);
+      actions.append(moveUp, moveDown, remove);
+      item.append(position, main, actions);
+      moveUp.addEventListener("click", () => moveFile(index, index - 1));
+      moveDown.addEventListener("click", () => moveFile(index, index + 1));
       remove.addEventListener("click", () => {
         files.splice(index, 1);
         syncInput();
@@ -239,6 +266,42 @@ const pdfImagesManager = createFileManager({
   sortable: true,
 });
 
+const imageFormat = document.querySelector("#imageFormat");
+const imageCompression = document.querySelector("#imageCompression");
+const imageCompressionNumber = document.querySelector("#imageCompressionNumber");
+const compressionOutput = document.querySelector("#compressionOutput");
+const compressionControl = document.querySelector("#compressionControl");
+const compressionHint = document.querySelector("#compressionHint");
+
+function normalizeCompression(value) {
+  const numeric = Number.parseInt(value, 10);
+  return Math.min(100, Math.max(0, Number.isNaN(numeric) ? 0 : numeric));
+}
+
+function setCompression(value) {
+  const normalized = normalizeCompression(value);
+  imageCompression.value = String(normalized);
+  imageCompressionNumber.value = String(normalized);
+  compressionOutput.textContent = `${normalized}%`;
+}
+
+function syncCompressionAvailability() {
+  const isPng = imageFormat.value === "png";
+  if (isPng) setCompression(0);
+  imageCompression.disabled = isPng;
+  imageCompressionNumber.disabled = isPng;
+  compressionControl.classList.toggle("is-disabled", isPng);
+  compressionHint.textContent = isPng
+    ? "PNG 固定為 0%，維持無損輸出"
+    : "0% 為最高畫質，100% 為最低品質";
+}
+
+imageCompression.addEventListener("input", () => setCompression(imageCompression.value));
+imageCompressionNumber.addEventListener("input", () => setCompression(imageCompressionNumber.value));
+imageFormat.addEventListener("change", syncCompressionAvailability);
+setCompression(0);
+syncCompressionAvailability();
+
 document.querySelector("#pdfImagesForm").addEventListener("submit", async (event) => {
   event.preventDefault();
   try {
@@ -320,7 +383,7 @@ function loadMorePages() {
     grid.appendChild(card);
   }
   state.loadedPages = nextEnd;
-  document.querySelector("#loadMorePages").disabled = state.loadedPages >= state.pageCount;
+  document.querySelector("#loadMorePages").classList.toggle("hidden", state.loadedPages >= state.pageCount);
 }
 
 document.querySelector("#loadMorePages").addEventListener("click", loadMorePages);

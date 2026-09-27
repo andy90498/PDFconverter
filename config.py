@@ -5,11 +5,13 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
 STORAGE_DIR = Path(os.getenv("STORAGE_DIR", str(BASE_DIR / "data" / "storage")))
 
-MAX_FILE_SIZE_MB = int(os.getenv("MAX_FILE_SIZE_MB", "150"))
-MAX_CONTENT_LENGTH = MAX_FILE_SIZE_MB * 1024 * 1024
-MAX_FILE_COUNT = int(os.getenv("MAX_FILE_COUNT", "20"))
+MAX_FILE_SIZE_MB = int(os.getenv("MAX_FILE_SIZE_MB", "300"))
+MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024
+MAX_CONTENT_LENGTH = MAX_FILE_SIZE_BYTES * int(os.getenv("MAX_FILE_COUNT", "40"))
+MAX_FILE_COUNT = int(os.getenv("MAX_FILE_COUNT", "40"))
 MAX_CONCURRENT_JOBS = int(os.getenv("MAX_CONCURRENT_JOBS", "4"))
 RETENTION_DAYS = int(os.getenv("RETENTION_DAYS", "3"))  # 保留：給 JOB_DIR/UPLOAD_DIR 暫存清理用
+CLEANUP_INTERVAL_SECONDS = int(os.getenv("CLEANUP_INTERVAL_SECONDS", "300"))
 
 RETENTION_OPTIONS = {
     "30m": 30 * 60,

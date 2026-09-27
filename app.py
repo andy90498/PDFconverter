@@ -19,7 +19,7 @@ import scheduler
 config.ensure_storage_dirs()
 
 app = Flask(__name__)
-app.config["MAX_CONTENT_LENGTH"] = config.MAX_CONTENT_LENGTH * config.MAX_FILE_COUNT
+app.config["MAX_CONTENT_LENGTH"] = config.MAX_CONTENT_LENGTH
 
 logging.basicConfig(
     level=logging.INFO,
@@ -98,7 +98,7 @@ def result_payload(job_id: str, output_path: Path, filename: str, base_url: str,
         info_image_url=f"{base_url}/download/{token}/info-image",
         expires_at=expires_at.isoformat(),
     )
-    return {"token": token, "filename": filename}
+    return {"token": token, "filename": filename, "expires_at": expires_at.isoformat()}
 
 def resolve_retention_seconds(raw_value: str | None) -> int:
     key = raw_value if raw_value in config.RETENTION_OPTIONS else config.DEFAULT_RETENTION_KEY
@@ -106,7 +106,9 @@ def resolve_retention_seconds(raw_value: str | None) -> int:
 
 @app.errorhandler(RequestEntityTooLarge)
 def too_large(_error):
-    return jsonify({"error": f"檔案太大，單檔限制為 {config.MAX_FILE_SIZE_MB} MB"}), 413
+    return jsonify(
+        {"error": f"上傳總量超過限制，單檔最多 {config.MAX_FILE_SIZE_MB} MB、每次最多 {config.MAX_FILE_COUNT} 個檔案"}
+    ), 413
 
 
 @app.errorhandler(processor.ProcessingError)
@@ -137,12 +139,16 @@ def create_pdf_to_images_job():
     files = processor.save_uploads(request.files.getlist("files"), upload_dir)
     processor.write_manifest(upload_dir, files)
     image_format = request.form.get("image_format", "jpg")
+    compression = request.form.get("compression", "0")
+    combine_folders = request.form.get("combine_folders") == "on"
     keep_annotations = request.form.get("keep_annotations", "true") == "true"
 
     def worker(progress):
         stored = processor.load_manifest(upload_dir)
         out = job_path(job_id) / "pdf_images.zip"
-        processor.pdf_to_images(stored, out, image_format, keep_annotations, progress)
+        processor.pdf_to_images(
+            stored, out, image_format, keep_annotations, compression, combine_folders, progress
+        )
         result_payload(job_id, out, "pdf_images.zip", base_url, retention_seconds)
         processor.remove_original_uploads(upload_dir)
 
@@ -159,13 +165,16 @@ def create_merge_job():
     files = processor.save_uploads(request.files.getlist("files"), upload_dir)
     processor.write_manifest(upload_dir, files)
     order = [int(index) for index in json.loads(request.form.get("order", "[]"))]
+    if sorted(order) != list(range(len(files))):
+        raise processor.ProcessingError("合併順序資料不完整")
     page_mode = request.form.get("page_mode", "original")
+    merge_filename = f"{processor.clean_stem(files[order[0]].original_name)}_merge.pdf"
 
     def worker(progress):
         stored = processor.load_manifest(upload_dir)
         out = job_path(job_id) / "merged.pdf"
         processor.merge_files_to_pdf(stored, order, out, page_mode, progress)
-        result_payload(job_id, out, "merged.pdf", base_url, retention_seconds)
+        result_payload(job_id, out, merge_filename, base_url, retention_seconds)
         processor.remove_original_uploads(upload_dir)
 
     executor.submit(run_job, job_id, worker)
@@ -218,7 +227,10 @@ def create_pages_job():
         stored = processor.load_manifest(source_upload_dir)
         out = job_path(job_id) / "pages.pdf"
         processor.extract_pdf_pages(stored[0].path, out, [int(page) for page in selected_pages], mode, progress)
-        result_payload(job_id, out, "pages.pdf", base_url, retention_seconds)
+        output_filename = f"{processor.clean_stem(stored[0].original_name)}_modified.pdf"
+        result = result_payload(job_id, out, output_filename, base_url, retention_seconds)
+        write_status(source_job_id, expires_at=result["expires_at"])
+        processor.remove_original_uploads(source_upload_dir)
 
     executor.submit(run_job, job_id, worker)
     return jsonify({"job_id": job_id})
@@ -226,18 +238,10 @@ def create_pages_job():
 
 @app.get("/download/<token>")
 def download(token: str):
-    token_dir = config.RESULT_DIR / token
-    if not token_dir.exists() or not token_dir.is_dir():
+    result = active_result(token)
+    if result is None:
         return jsonify({"error": "下載連結不存在或已過期"}), 404
-    meta_path = token_dir / "result.json"
-    if not meta_path.exists():
-        return jsonify({"error": "找不到下載檔案"}), 404
-    meta = json.loads(meta_path.read_text(encoding="utf-8"))
-
-    expires_at = datetime.fromisoformat(meta["expires_at"])
-    if expires_at < datetime.now(timezone.utc):
-        return jsonify({"error": "下載連結已過期"}), 404
-
+    token_dir, meta = result
     filename = meta["filename"]
     result_file = token_dir / filename
     if not result_file.exists():
@@ -245,9 +249,30 @@ def download(token: str):
     return send_file(result_file, as_attachment=True, download_name=result_file.name)
 
 
+def active_result(token: str) -> tuple[Path, dict[str, str]] | None:
+    token_dir = config.RESULT_DIR / token
+    if not token_dir.exists() or not token_dir.is_dir():
+        return None
+    meta_path = token_dir / "result.json"
+    if not meta_path.exists():
+        return None
+    try:
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        expires_at = datetime.fromisoformat(meta["expires_at"])
+    except (json.JSONDecodeError, KeyError, ValueError):
+        return None
+
+    if expires_at < datetime.now(timezone.utc):
+        return None
+    return token_dir, meta
+
+
 @app.get("/download/<token>/qr")
 def download_qr(token: str):
-    qr_path = config.RESULT_DIR / token / "download_qr.png"
+    result = active_result(token)
+    if result is None:
+        return jsonify({"error": "QR CODE 不存在或已過期"}), 404
+    qr_path = result[0] / "download_qr.png"
     if not qr_path.exists():
         return jsonify({"error": "QR CODE 不存在或已過期"}), 404
     return send_file(qr_path, mimetype="image/png")
@@ -255,7 +280,10 @@ def download_qr(token: str):
 
 @app.get("/download/<token>/info-image")
 def download_info_image(token: str):
-    info_path = config.RESULT_DIR / token / "download_info.png"
+    result = active_result(token)
+    if result is None:
+        return jsonify({"error": "下載資訊圖片不存在或已過期"}), 404
+    info_path = result[0] / "download_info.png"
     if not info_path.exists():
         return jsonify({"error": "下載資訊圖片不存在或已過期"}), 404
     return send_file(info_path, as_attachment=True, download_name="download_info.png", mimetype="image/png")

@@ -31,6 +31,21 @@ def _is_result_expired(token_dir: Path, now: datetime) -> bool:
         return True
 
 
+def _is_job_expired(path: Path, now: datetime) -> bool | None:
+    status_path = config.JOB_DIR / path.name / "status.json"
+    if not status_path.exists():
+        return None
+    try:
+        status = json.loads(status_path.read_text(encoding="utf-8"))
+        expires_at = status.get("expires_at")
+        if not expires_at:
+            return None
+        return datetime.fromisoformat(expires_at) < now
+    except (json.JSONDecodeError, ValueError, TypeError):
+        logger.exception("無法解析任務到期時間：%s", status_path)
+        return None
+
+
 def cleanup_expired() -> None:
     now = datetime.now(timezone.utc)
     fallback_deadline = now - timedelta(days=config.RETENTION_DAYS)
@@ -46,13 +61,14 @@ def cleanup_expired() -> None:
                     logger.exception("清理過期結果失敗：%s", path)
 
         # JOB_DIR、UPLOAD_DIR：沒有 expires_at 概念，維持用 mtime 判斷
-        for parent in (config.JOB_DIR, config.UPLOAD_DIR):
+        for parent in (config.UPLOAD_DIR, config.JOB_DIR):
             if not parent.exists():
                 continue
             for path in parent.iterdir():
                 try:
                     modified = datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc)
-                    if modified < fallback_deadline:
+                    job_expired = _is_job_expired(path, now)
+                    if job_expired is True or (job_expired is None and modified < fallback_deadline):
                         if path.is_dir():
                             shutil.rmtree(path, ignore_errors=True)
                         else:
@@ -69,7 +85,7 @@ def _cleanup_loop() -> None:
             pass
         except Exception:
             logger.exception("背景清理排程失敗")
-        time.sleep(43200)
+        time.sleep(config.CLEANUP_INTERVAL_SECONDS)
 
 
 def start_cleanup_scheduler() -> None:

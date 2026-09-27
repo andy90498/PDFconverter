@@ -43,17 +43,29 @@
           </div>
           <ol id="pdfImagesList" class="sort-list empty"></ol>
         </div>
-        <div class="control-grid">
+        <div class="control-grid pdf-image-controls">
           <label>
             圖片格式
-            <select name="image_format">
+            <select name="image_format" id="imageFormat">
               <option value="jpg">JPG 高品質</option>
               <option value="png">PNG 無損</option>
             </select>
           </label>
+          <label class="compression-control" id="compressionControl">
+            <span>JPG 壓縮率 <output id="compressionOutput">0%</output></span>
+            <span class="compression-inputs">
+              <input id="imageCompression" name="compression" type="range" min="0" max="100" value="0" aria-label="JPG 壓縮率">
+              <input id="imageCompressionNumber" type="number" min="0" max="100" value="0" inputmode="numeric" aria-label="JPG 壓縮率數值">
+            </span>
+            <small id="compressionHint">0% 為最高畫質，100% 為最低品質</small>
+          </label>
           <label class="switch">
             <input type="checkbox" name="keep_annotations" checked>
             <span>保留註記 / 塗鴉</span>
+          </label>
+          <label class="switch">
+            <input type="checkbox" name="combine_folders">
+            <span>所有圖片合併至 ZIP 根目錄</span>
           </label>
           <label>
             保留時限
@@ -129,7 +141,7 @@
         <button type="submit" class="primary">載入頁面</button>
       </form>
       <div id="pageWorkspace" class="page-workspace hidden">
-        <div class="page-actions">
+        <div class="page-controls">
           <div class="segmented">
             <button type="button" class="active" data-mode="keep">保留勾選頁</button>
             <button type="button" data-mode="delete">刪除勾選頁</button>
@@ -146,10 +158,12 @@
               <option value="72h" selected>72 小時（預設）</option>
             </select>
           </label>
+        </div>
+        <div id="pageGrid" class="page-grid"></div>
+        <div class="page-actions">
           <button type="button" id="loadMorePages" class="ghost">載入更多頁</button>
           <button type="button" id="processPages" class="primary">產生 PDF</button>
         </div>
-        <div id="pageGrid" class="page-grid"></div>
       </div>
     </section>
 

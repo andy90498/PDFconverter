@@ -5,6 +5,7 @@ import mimetypes
 import shutil
 import zipfile
 import threading
+import unicodedata
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -14,7 +15,6 @@ import pymupdf as fitz
 import qrcode
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 from werkzeug.datastructures import FileStorage
-from werkzeug.utils import secure_filename
 
 import config
 _fitz_lock = threading.Lock()
@@ -48,13 +48,36 @@ class StoredFile:
 
 
 def clean_stem(name: str) -> str:
-    stem = Path(name).stem.strip() or "file"
-    safe = secure_filename(stem) or "file"
-    return safe
+    return _sanitize_component(Path(_safe_filename(name)).stem)
+
+
+def _sanitize_component(value: str) -> str:
+    forbidden = set('\\/:*?"<>|')
+    cleaned = "".join(
+        "_" if char in forbidden or unicodedata.category(char).startswith("C") else char
+        for char in unicodedata.normalize("NFC", value)
+    ).strip(" .")
+    if not cleaned:
+        return "file"
+    if cleaned.upper() in {"CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"}:
+        return f"{cleaned}_"
+    return cleaned
+
+
+def _safe_filename(name: str) -> str:
+    basename = unicodedata.normalize("NFC", name).replace("\\", "/").rsplit("/", 1)[-1]
+    suffix = Path(basename).suffix
+    stem = basename[: -len(suffix)] if suffix else basename
+    safe_stem = _sanitize_component(stem)
+    safe_suffix = "".join(
+        "_" if char in '\\/:*?"<>|' or unicodedata.category(char).startswith("C") else char
+        for char in suffix
+    )
+    return f"{safe_stem}{safe_suffix}"
 
 
 def unique_path(directory: Path, filename: str) -> Path:
-    candidate = directory / secure_filename(filename)
+    candidate = directory / _safe_filename(filename)
     if not candidate.exists():
         return candidate
     stem = candidate.stem
@@ -113,19 +136,23 @@ def save_uploads(files: Iterable[FileStorage], job_upload_dir: Path) -> list[Sto
         if len(stored_files) >= config.MAX_FILE_COUNT:
             raise ProcessingError(f"一次最多只能上傳 {config.MAX_FILE_COUNT} 個檔案")
 
-        original_ext = Path(uploaded.filename).suffix.lower()
+        original_name = _safe_filename(uploaded.filename)
+        original_ext = Path(original_name).suffix.lower()
         if original_ext not in config.ALLOWED_EXTENSIONS:
             raise ProcessingError(f"不支援的副檔名：{original_ext}")
 
-        stem = clean_stem(uploaded.filename)
+        stem = clean_stem(original_name)
         safe_name = f"{stem}{original_ext}"
 
         target = unique_path(job_upload_dir, safe_name)
         uploaded.save(target)
+        if target.stat().st_size > config.MAX_FILE_SIZE_BYTES:
+            target.unlink(missing_ok=True)
+            raise ProcessingError(f"單檔限制為 {config.MAX_FILE_SIZE_MB} MB：{original_name}")
         mime_type = validate_uploaded_file(target)
         stored_files.append(
             StoredFile(
-                original_name=uploaded.filename,
+                original_name=original_name,
                 safe_name=target.name,
                 path=target,
                 mime_type=mime_type,
@@ -167,11 +194,23 @@ def pdf_to_images(
     output_zip: Path,
     image_format: str,
     keep_annotations: bool,
+    compression: str | int,
+    combine_folders: bool,
     progress: Progress,
 ) -> None:
     fmt = image_format.lower()
     if fmt not in {"jpg", "png"}:
         raise ProcessingError("圖片格式必須是 JPG 或 PNG")
+    if fmt == "png":
+        jpeg_quality = 100
+    else:
+        try:
+            compression_value = int(compression)
+        except (TypeError, ValueError) as exc:
+            raise ProcessingError("JPG 壓縮率必須是 0 到 100 的整數") from exc
+        if not 0 <= compression_value <= 100:
+            raise ProcessingError("JPG 壓縮率必須介於 0 到 100")
+        jpeg_quality = max(1, 100 - compression_value)
     pdf_files = [item for item in files if item.path.suffix.lower() == ".pdf"]
     if not pdf_files:
         raise ProcessingError("請上傳至少一個 PDF")
@@ -184,7 +223,7 @@ def pdf_to_images(
     for item in pdf_files:
         doc = fitz.open(item.path)
         folder_name = Path(item.safe_name).stem  # 改用 safe_name，保證每個檔案唯一
-        folder = temp_dir / folder_name
+        folder = temp_dir if combine_folders else temp_dir / folder_name
         folder.mkdir(parents=True, exist_ok=True)
         matrix = fitz.Matrix(300 / 72, 300 / 72)
         for index, page in enumerate(doc, start=1):
@@ -192,7 +231,7 @@ def pdf_to_images(
             ext = "jpg" if fmt == "jpg" else "png"
             out_path = folder / f"{folder_name}_page_{index:03d}.{ext}"
             if fmt == "jpg":
-                pix.pil_save(str(out_path), format="JPEG", quality=98)
+                pix.pil_save(str(out_path), format="JPEG", quality=jpeg_quality)
             else:
                 pix.save(str(out_path))
             done += 1
