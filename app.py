@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import logging
 import os
 import uuid
@@ -155,8 +156,16 @@ def prepare_upload(field: str):
 
 @app.get("/")
 def index():
-    return render_template("index.html", max_file_count=config.MAX_FILE_COUNT, max_file_size=config.MAX_FILE_SIZE_MB,
-                           max_total_upload_size=config.MAX_TOTAL_UPLOAD_SIZE_GB)
+    asset_versions = {
+        name: hashlib.sha256((Path(app.static_folder) / name).read_bytes()).hexdigest()[:16]
+        for name in ('script.js', 'style.css')
+    }
+    response = app.make_response(render_template(
+        "index.html", max_file_count=config.MAX_FILE_COUNT, max_file_size=config.MAX_FILE_SIZE_MB,
+        max_total_upload_size=config.MAX_TOTAL_UPLOAD_SIZE_GB, asset_versions=asset_versions,
+    ))
+    response.headers['Cache-Control'] = 'no-cache'
+    return response
 
 
 @app.get("/api/status/<job_id>")
