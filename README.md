@@ -30,3 +30,11 @@ PDFCONVERTER_IMAGE=ghcr.io/<github-owner>/<repo-name>:latest docker compose -f d
 ```
 
 第一次使用 GHCR 私有映像檔時，需要先在伺服器執行 `docker login ghcr.io`。
+# 上鎖 PDF 支援
+
+所有功能皆支援需要開啟密碼的 PDF。遇到上鎖檔案才會顯示密碼視窗；不同檔案可使用不同密碼，錯誤時可重試，取消則停止處理。密碼不會寫入任務狀態或日誌。
+
+第四個功能「上鎖、解鎖 PDF」支援批次處理。上鎖設定新的開啟密碼並使用 AES-256；解鎖輸出不需要密碼的 PDF。單份下載 PDF，多份下載 ZIP。下載保留期限沿用各功能選項。
+
+開發新 PDF 功能時，依 `AGENTS.md` 套用 `.agents/skills/pdf-password-support/SKILL.md`。
+

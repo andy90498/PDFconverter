@@ -17,6 +17,7 @@
       <div class="limits">
         <span>單檔 {{ max_file_size }} MB</span>
         <span>最多 {{ max_file_count }} 個檔案</span>
+        <span>單次總量 {{ max_total_upload_size }} GB</span>
       </div>
     </section>
 
@@ -24,6 +25,7 @@
       <button class="tab active" data-panel="pdf-images">PDF 轉圖片</button>
       <button class="tab" data-panel="merge-pdf">合併 PDF</button>
       <button class="tab" data-panel="page-tools">PDF 頁面整理</button>
+      <button class="tab" data-panel="pdf-security">上鎖、解鎖 PDF</button>
     </nav>
 
     <section id="pdf-images" class="panel active">
@@ -129,8 +131,8 @@
 
     <section id="page-tools" class="panel">
       <div class="panel-head">
-        <h2>視覺化頁面擷取與刪除</h2>
-        <p>分批載入縮圖，後端以最終保留頁碼重新組裝。</p>
+        <h2>頁面排序、旋轉與刪減</h2>
+        <p>拖曳縮圖調整順序，使用下方按鈕旋轉。未勾選時保留全部頁面；有勾選時依保留或刪除模式處理。調整後即可產生新 PDF。</p>
       </div>
       <form id="pageUploadForm" class="tool-form">
         <label class="drop-zone">
@@ -167,6 +169,39 @@
       </div>
     </section>
 
+    <section id="pdf-security" class="panel">
+      <div class="panel-head">
+        <h2>上鎖、解鎖 PDF</h2>
+        <p>支援多份 PDF。單份直接下載，多份打包成 ZIP；上鎖使用 AES-256 加密。</p>
+      </div>
+      <form id="securityForm" class="tool-form">
+        <label class="drop-zone">
+          <input type="file" name="files" accept="application/pdf,.pdf" multiple required>
+          <span>拖曳 PDF 到這裡，或點選上傳</span>
+        </label>
+        <div class="file-review">
+          <div class="file-review-head"><strong>待處理 PDF</strong><span id="securityCount"></span></div>
+          <ol id="securityList" class="sort-list empty"></ol>
+        </div>
+        <div class="control-grid">
+          <label>處理方式<select id="securityMode" name="mode">
+            <option value="lock">上鎖 PDF</option><option value="unlock">解鎖 PDF</option>
+          </select></label>
+          <label id="newPasswordControl">設定開啟密碼
+            <input id="newPassword" name="new_password" type="password" autocomplete="new-password" required>
+            <small>最多 40 個 UTF-8 位元組；請妥善保存密碼。</small>
+          </label>
+          <label>保留時限<select name="retention">
+            <option value="30m">30 分鐘</option><option value="1h">1 小時</option>
+            <option value="3h">3 小時</option><option value="12h">12 小時</option>
+            <option value="24h">24 小時</option><option value="48h">48 小時</option>
+            <option value="72h" selected>72 小時（預設）</option>
+          </select></label>
+        </div>
+        <button type="submit" class="primary">開始處理</button>
+      </form>
+    </section>
+
     <section class="progress-card" aria-live="polite">
       <div class="progress-meta">
         <span id="progressLabel">準備就緒</span>
@@ -195,6 +230,18 @@
       </div>
     </section>
   </div>
+  <dialog id="passwordDialog" class="password-dialog" aria-labelledby="passwordTitle">
+    <form method="dialog" class="tool-form">
+      <h2 id="passwordTitle">PDF 開啟密碼</h2>
+      <strong id="passwordFile"></strong>
+      <p id="passwordHint"></p>
+      <label>密碼<input id="sourcePassword" type="password" autocomplete="off"></label>
+      <div class="page-actions">
+        <button value="cancel" class="ghost" formnovalidate>取消</button>
+        <button value="confirm" class="primary">繼續處理</button>
+      </div>
+    </form>
+  </dialog>
   <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

@@ -4,6 +4,8 @@ const state = {
   loadedPages: 0,
   pageMode: "keep",
   selectedPages: new Set(),
+  pageOrder: [],
+  pageRotations: {},
 };
 
 const progressLabel = document.querySelector("#progressLabel");
@@ -198,10 +200,47 @@ function createFileManager({ input, list, count, sortable }) {
 async function postForm(url, formData) {
   hideDownload();
   setProgress(2, "正在上傳");
-  const response = await fetch(url, { method: "POST", body: formData });
-  const payload = await response.json();
-  if (!response.ok) throw new Error(payload.error || "上傳失敗");
-  return payload;
+  const passwords = {};
+  try {
+    while (true) {
+      const response = await fetch(url, { method: "POST", body: formData });
+      const payload = await response.json();
+      if (response.status === 409 && payload.password_required) {
+        formData.set('upload_id', payload.upload_id);
+        formData.delete('files');
+        formData.delete('file');
+        for (const file of payload.password_required) {
+          passwords[String(file.index)] = await askPdfPassword(file);
+        }
+        formData.set('passwords', JSON.stringify(passwords));
+        continue;
+      }
+      if (!response.ok) throw new Error(payload.error || "上傳失敗");
+      return payload;
+    }
+  } finally {
+    formData.delete('passwords');
+    formData.delete('new_password');
+  }
+}
+
+function askPdfPassword(file) {
+  const dialog = document.querySelector('#passwordDialog');
+  const input = document.querySelector('#sourcePassword');
+  document.querySelector('#passwordFile').textContent = file.filename;
+  document.querySelector('#passwordHint').textContent = file.incorrect
+    ? '密碼不正確，請重新輸入。' : '這份 PDF 已上鎖，請輸入開啟密碼。';
+  input.value = '';
+  dialog.showModal();
+  input.focus();
+  return new Promise((resolve, reject) => {
+    dialog.addEventListener('close', () => {
+      const password = input.value;
+      input.value = '';
+      if (dialog.returnValue === 'confirm') resolve(password);
+      else reject(new Error('已取消 PDF 密碼輸入'));
+    }, { once: true });
+  });
 }
 
 function pollJob(jobId) {
@@ -357,6 +396,8 @@ document.querySelector("#pageUploadForm").addEventListener("submit", async (even
     state.pageCount = payload.page_count;
     state.loadedPages = 0;
     state.selectedPages.clear();
+    state.pageOrder = Array.from({length: payload.page_count}, (_, index) => index + 1);
+    state.pageRotations = {};
     document.querySelector("#pageGrid").innerHTML = "";
     document.querySelector("#pageWorkspace").classList.remove("hidden");
     setProgress(100, `已載入 ${payload.page_count} 頁`);
@@ -370,15 +411,52 @@ function loadMorePages() {
   const grid = document.querySelector("#pageGrid");
   const nextEnd = Math.min(state.loadedPages + 24, state.pageCount);
   for (let page = state.loadedPages + 1; page <= nextEnd; page += 1) {
-    const card = document.createElement("button");
-    card.type = "button";
+    const card = document.createElement("div");
     card.className = "page-card";
     card.dataset.page = String(page);
-    card.innerHTML = `<img src="/api/pages/${state.pageJobId}/thumbnail/${page}" alt="第 ${page} 頁"><span>第 ${page} 頁</span>`;
-    card.addEventListener("click", () => {
+    card.draggable = true;
+    card.innerHTML = `<button type="button" class="page-select" aria-pressed="false" aria-label="勾選原第 ${page} 頁"><div class="page-preview"><img draggable="false" src="/api/pages/${state.pageJobId}/thumbnail/${page}" alt="原第 ${page} 頁"></div><span>原第 ${page} 頁</span></button><div class="page-rotations"><button type="button" data-angle="-90" aria-label="原第 ${page} 頁向左旋轉 90 度">↶ 左轉 90°</button><button type="button" data-angle="90" aria-label="原第 ${page} 頁向右旋轉 90 度">↷ 右轉 90°</button></div>`;
+    const select = card.querySelector('.page-select');
+    select.addEventListener("click", () => {
       if (state.selectedPages.has(page)) state.selectedPages.delete(page);
       else state.selectedPages.add(page);
       card.classList.toggle("selected", state.selectedPages.has(page));
+      select.setAttribute('aria-pressed', String(state.selectedPages.has(page)));
+    });
+    card.querySelectorAll('[data-angle]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const angle = ((state.pageRotations[page] || 0) + Number(button.dataset.angle) + 360) % 360;
+        state.pageRotations[page] = angle;
+        const img = card.querySelector('img');
+        img.style.transform = `rotate(${angle}deg)`;
+        img.style.width = angle % 180 ? '75%' : '100%';
+      });
+    });
+    card.addEventListener('dragstart', (event) => {
+      event.dataTransfer.setData('text/plain', String(page));
+      event.dataTransfer.effectAllowed = 'move';
+      card.classList.add('dragging');
+    });
+    card.addEventListener('dragend', () => {
+      card.classList.remove('dragging');
+      grid.querySelectorAll('.drop-target').forEach((item) => item.classList.remove('drop-target'));
+    });
+    card.addEventListener('dragover', (event) => {
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'move';
+      card.classList.add('drop-target');
+    });
+    card.addEventListener('dragleave', () => card.classList.remove('drop-target'));
+    card.addEventListener('drop', (event) => {
+      event.preventDefault();
+      card.classList.remove('drop-target');
+      const from = state.pageOrder.indexOf(Number(event.dataTransfer.getData('text/plain')));
+      const to = state.pageOrder.indexOf(page);
+      if (from < 0 || from === to) return;
+      const [moved] = state.pageOrder.splice(from, 1);
+      state.pageOrder.splice(to, 0, moved);
+      const cards = new Map(Array.from(grid.children, (item) => [Number(item.dataset.page), item]));
+      state.pageOrder.forEach((number) => { if (cards.has(number)) grid.appendChild(cards.get(number)); });
     });
     grid.appendChild(card);
   }
@@ -388,7 +466,7 @@ function loadMorePages() {
 
 document.querySelector("#loadMorePages").addEventListener("click", loadMorePages);
 
-document.querySelectorAll(".segmented button").forEach((button) => {
+document.querySelectorAll("#pageWorkspace .segmented button").forEach((button) => {
   button.addEventListener("click", () => {
     document.querySelectorAll(".segmented button").forEach((item) => item.classList.remove("active"));
     button.classList.add("active");
@@ -396,10 +474,44 @@ document.querySelectorAll(".segmented button").forEach((button) => {
   });
 });
 
+const securityForm = document.querySelector('#securityForm');
+const securityMode = document.querySelector('#securityMode');
+const newPassword = document.querySelector('#newPassword');
+function syncSecurityMode() {
+  const locking = securityMode.value === 'lock';
+  document.querySelector('#newPasswordControl').classList.toggle('hidden', !locking);
+  newPassword.required = locking;
+  newPassword.disabled = !locking;
+  if (!locking) newPassword.value = '';
+}
+securityMode.addEventListener('change', syncSecurityMode);
+syncSecurityMode();
+createFileManager({ input: securityForm.querySelector('input[type=file]'),
+  list: document.querySelector('#securityList'), count: document.querySelector('#securityCount'), sortable: false });
+securityForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const button = securityForm.querySelector('button[type=submit]');
+  button.disabled = true;
+  try {
+    const data = new FormData(securityForm);
+    newPassword.value = '';
+    const payload = await postForm('/api/jobs/pdf-security', data);
+    pollJob(payload.job_id);
+  } catch (error) {
+    progressLabel.textContent = error.message;
+  } finally {
+    button.disabled = false;
+  }
+});
+
 document.querySelector("#processPages").addEventListener("click", async () => {
   try {
     if (!state.pageJobId) throw new Error("請先載入 PDF");
-    if (state.selectedPages.size === 0) throw new Error("請至少勾選一頁");
+    const kept = state.pageOrder.filter((page) => state.selectedPages.size === 0 ||
+      (state.pageMode === 'keep' ? state.selectedPages.has(page) : !state.selectedPages.has(page)));
+    if (kept.length === 0) throw new Error('至少必須保留一頁');
+    const changed = kept.length !== state.pageCount || kept.some((page, index) => page !== index + 1 || state.pageRotations[page]);
+    if (!changed) throw new Error('請先調整頁面順序、旋轉或刪減頁面');
     hideDownload();
     setProgress(2, "正在建立頁面整理任務");
     const retention = document.querySelector("#pageRetention").value;
@@ -409,6 +521,8 @@ document.querySelector("#processPages").addEventListener("click", async () => {
       body: JSON.stringify({
         source_job_id: state.pageJobId,
         selected_pages: Array.from(state.selectedPages),
+        page_order: state.pageOrder,
+        rotations: state.pageRotations,
         mode: state.pageMode,
         retention: retention,
       }),

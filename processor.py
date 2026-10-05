@@ -39,6 +39,50 @@ class ProcessingError(Exception):
     pass
 
 
+class PasswordRequired(ProcessingError):
+    def __init__(self, files):
+        super().__init__("請輸入上鎖 PDF 的密碼")
+        self.files = files
+
+
+def prepare_pdf_uploads(files: list[StoredFile], passwords: dict) -> None:
+    """Authenticate all inputs before replacing encrypted temporary uploads."""
+    required = []
+    for index, item in enumerate(files):
+        if item.path.suffix.lower() != '.pdf':
+            continue
+        with _fitz_lock, fitz.open(item.path) as doc:
+            if doc.needs_pass and not doc.authenticate(passwords.get(str(index), '')):
+                required.append({'index': index, 'filename': item.original_name,
+                                 'incorrect': str(index) in passwords})
+    if required:
+        raise PasswordRequired(required)
+    for index, item in enumerate(files):
+        if item.path.suffix.lower() != '.pdf':
+            continue
+        temp = item.path.with_suffix('.decrypted.tmp')
+        with _fitz_lock, fitz.open(item.path) as doc:
+            if not doc.is_encrypted and not doc.needs_pass:
+                continue
+            if doc.needs_pass and not doc.authenticate(passwords.get(str(index), '')):
+                raise PasswordRequired([{'index': index, 'filename': item.original_name}])
+            doc.save(temp, encryption=fitz.PDF_ENCRYPT_NONE, garbage=4, deflate=True)
+        temp.replace(item.path)
+
+
+def secure_pdf(source: Path, output: Path, mode: str, password: str = '') -> None:
+    if mode not in {'lock', 'unlock'}:
+        raise ProcessingError('請選擇上鎖或解鎖')
+    if mode == 'lock' and (not password or len(password.encode('utf-8')) > 40):
+        raise ProcessingError('新密碼必須為 1 到 40 個 UTF-8 位元組')
+    with _fitz_lock, fitz.open(source) as doc:
+        options = {'encryption': fitz.PDF_ENCRYPT_NONE}
+        if mode == 'lock':
+            options = {'encryption': fitz.PDF_ENCRYPT_AES_256, 'user_pw': password,
+                       'owner_pw': password}
+        doc.save(output, garbage=4, deflate=True, **options)
+
+
 @dataclass(frozen=True)
 class StoredFile:
     original_name: str
@@ -130,6 +174,7 @@ def validate_uploaded_file(path: Path) -> str:
 def save_uploads(files: Iterable[FileStorage], job_upload_dir: Path) -> list[StoredFile]:
     job_upload_dir.mkdir(parents=True, exist_ok=True)
     stored_files: list[StoredFile] = []
+    total_size = 0
     for uploaded in files:
         if not uploaded or not uploaded.filename:
             continue
@@ -146,9 +191,14 @@ def save_uploads(files: Iterable[FileStorage], job_upload_dir: Path) -> list[Sto
 
         target = unique_path(job_upload_dir, safe_name)
         uploaded.save(target)
-        if target.stat().st_size > config.MAX_FILE_SIZE_BYTES:
+        file_size = target.stat().st_size
+        if file_size > config.MAX_FILE_SIZE_BYTES:
             target.unlink(missing_ok=True)
             raise ProcessingError(f"單檔限制為 {config.MAX_FILE_SIZE_MB} MB：{original_name}")
+        total_size += file_size
+        if total_size > config.MAX_TOTAL_UPLOAD_SIZE_BYTES:
+            target.unlink(missing_ok=True)
+            raise ProcessingError(f"單次上傳檔案總和不可超過 {config.MAX_TOTAL_UPLOAD_SIZE_GB} GB")
         mime_type = validate_uploaded_file(target)
         stored_files.append(
             StoredFile(
@@ -338,16 +388,37 @@ def normalize_keep_pages(page_total: int, selected_pages: list[int], mode: str) 
     return keep_pages
 
 
-def extract_pdf_pages(source_pdf: Path, output_pdf: Path, selected_pages: list[int], mode: str, progress: Progress) -> None:
-    source = fitz.open(source_pdf)
-    keep_pages = normalize_keep_pages(source.page_count, selected_pages, mode)
-    result = fitz.open()
-    for index, page_number in enumerate(keep_pages, start=1):
-        result.insert_pdf(source, from_page=page_number - 1, to_page=page_number - 1)
-        progress(round(index / len(keep_pages) * 95), f"正在整理第 {page_number} 頁")
-    result.save(output_pdf, garbage=4, deflate=True)
-    result.close()
-    source.close()
+def extract_pdf_pages(source_pdf: Path, output_pdf: Path, selected_pages: list[int], mode: str, progress: Progress,
+                      page_order: list[int] | None = None, rotations: dict | None = None) -> None:
+    with fitz.open(source_pdf) as source, fitz.open() as result:
+        original = list(range(1, source.page_count + 1))
+        edits = page_order is not None
+        order = page_order if edits else original
+        if not isinstance(order, list) or any(type(p) is not int for p in order) or sorted(order) != original:
+            raise ProcessingError("頁面順序資料不完整")
+        if mode not in {'keep', 'delete'}:
+            raise ProcessingError("頁面處理模式無效")
+        angles = {}
+        if rotations is not None and not isinstance(rotations, dict):
+            raise ProcessingError("旋轉設定無效")
+        for key, angle in (rotations or {}).items():
+            try:
+                page = int(key)
+            except (ValueError, TypeError) as exc:
+                raise ProcessingError("旋轉頁碼無效") from exc
+            if page not in original or type(angle) is not int or angle % 90:
+                raise ProcessingError("旋轉設定必須使用有效頁碼與 90 度的倍數")
+            angles[page] = angle % 360
+        keep = set(original if edits and not selected_pages else normalize_keep_pages(source.page_count, selected_pages, mode))
+        keep_pages = [page for page in order if page in keep]
+        if edits and keep_pages == original and not any(angles.get(p, 0) for p in keep_pages):
+            raise ProcessingError("請先調整頁面順序、旋轉或刪減頁面")
+        for index, page_number in enumerate(keep_pages, start=1):
+            result.insert_pdf(source, from_page=page_number - 1, to_page=page_number - 1)
+            page = result[-1]
+            page.set_rotation((page.rotation + angles.get(page_number, 0)) % 360)
+            progress(round(index / len(keep_pages) * 95), f"正在整理第 {page_number} 頁")
+        result.save(output_pdf, garbage=4, deflate=True)
     progress(100, "PDF 頁面整理完成")
 
 

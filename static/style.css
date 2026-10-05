@@ -617,10 +617,17 @@ button:disabled {
 .page-card img {
   display: block;
   width: 100%;
-  aspect-ratio: 3 / 4;
-  object-fit: cover;
+  height: 100%;
+  object-fit: contain;
   background: #fff;
 }
+
+.page-preview { aspect-ratio: 3 / 4; display: flex; align-items: center; justify-content: center; background: white; overflow: hidden; }
+.page-select { display: block; width: 100%; border: 0; padding: 0; background: transparent; color: var(--ink); cursor: grab; text-align: left; }
+.page-rotations { display: flex; gap: 4px; padding: 0 6px 8px; }
+.page-rotations button { flex: 1; min-height: 36px; padding: 3px; border: 1px solid rgba(48, 104, 155, 0.3); border-radius: 9px; background: rgba(229, 243, 255, 0.86); color: var(--ink); cursor: pointer; font-size: 0.75rem; }
+.page-card.dragging { opacity: 0.45; }
+.page-card.drop-target { border-color: var(--accent-2); }
 
 .page-card span {
   display: block;
@@ -673,4 +680,23 @@ button:disabled {
   .page-actions button {
     flex: 1;
   }
+}
+.password-dialog {
+  width: min(440px, calc(100vw - 40px));
+  padding: 28px;
+  border: 1px solid #d9e6ef;
+  border-radius: 24px;
+  color: #18202d;
+  background: #f6fbff;
+  box-shadow: 0 24px 80px #18202d33;
+}
+
+.password-dialog::backdrop { background: #18202d66; }
+.password-dialog strong { overflow-wrap: anywhere; }
+input[type="password"] {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d9e6ef;
+  border-radius: 12px;
+  background: white;
 }

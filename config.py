@@ -7,8 +7,11 @@ STORAGE_DIR = Path(os.getenv("STORAGE_DIR", str(BASE_DIR / "data" / "storage")))
 
 MAX_FILE_SIZE_MB = int(os.getenv("MAX_FILE_SIZE_MB", "300"))
 MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024
-MAX_CONTENT_LENGTH = MAX_FILE_SIZE_BYTES * int(os.getenv("MAX_FILE_COUNT", "40"))
-MAX_FILE_COUNT = int(os.getenv("MAX_FILE_COUNT", "40"))
+MAX_FILE_COUNT = int(os.getenv("MAX_FILE_COUNT", "100"))
+MAX_TOTAL_UPLOAD_SIZE_GB = int(os.getenv("MAX_TOTAL_UPLOAD_SIZE_GB", "5"))
+MAX_TOTAL_UPLOAD_SIZE_BYTES = MAX_TOTAL_UPLOAD_SIZE_GB * 1024 ** 3
+# Allow multipart headers while enforcing the exact file-byte total separately.
+MAX_CONTENT_LENGTH = MAX_TOTAL_UPLOAD_SIZE_BYTES + MAX_FILE_COUNT * 64 * 1024
 MAX_CONCURRENT_JOBS = int(os.getenv("MAX_CONCURRENT_JOBS", "4"))
 RETENTION_DAYS = int(os.getenv("RETENTION_DAYS", "3"))  # 保留：給 JOB_DIR/UPLOAD_DIR 暫存清理用
 CLEANUP_INTERVAL_SECONDS = int(os.getenv("CLEANUP_INTERVAL_SECONDS", "300"))
