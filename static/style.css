@@ -496,6 +496,64 @@ button:disabled {
   -webkit-backdrop-filter: blur(30px) saturate(160%);
 }
 
+.site-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 24px;
+  padding: 22px 4px 0;
+  border-top: 1px solid rgba(83, 103, 130, 0.2);
+}
+
+.maintenance-contact {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.maintenance-qr {
+  display: block;
+  flex: 0 0 112px;
+  width: 112px;
+  height: 112px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 3px 12px rgba(39, 60, 88, 0.08);
+}
+
+.maintenance-qr img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: inherit;
+}
+
+.maintenance-qr:focus-visible {
+  outline: 3px solid #06c755;
+  outline-offset: 4px;
+}
+
+.maintenance-copy {
+  min-width: 0;
+}
+
+.maintenance-copy strong {
+  color: var(--ink);
+  font-size: 1rem;
+}
+
+.maintenance-copy p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
 .footer-credit {
     display: flex;
     justify-content: flex-end;

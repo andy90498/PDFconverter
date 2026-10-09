@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PDF 轉換器</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=asset_versions['style.css']) }}">
 </head>
 <body>
   <main class="shell">
@@ -211,7 +211,18 @@
         <div id="progressBar" class="progress-bar"></div>
       </div>
     </section>
-	<div class="footer-credit">Powered by Vermilion Chang</div>
+    <footer class="site-footer">
+      <div class="maintenance-contact">
+        <a class="maintenance-qr" href="{{ url_for('static', filename='QRcode.png') }}" target="_blank" rel="noopener" aria-label="放大 LINE 維修公告 QR code">
+          <img src="{{ url_for('static', filename='QRcode.png') }}" width="112" height="112" alt="LINE 維修公告官方帳號 QR code" loading="lazy">
+        </a>
+        <div class="maintenance-copy">
+          <strong>維修公告</strong>
+          <p>LINE 官方帳號・僅提供維修公告</p>
+        </div>
+      </div>
+      <div class="footer-credit">Powered by Vermilion Chang</div>
+    </footer>
   </main>
 
   <div id="resultModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
@@ -242,6 +253,6 @@
       </div>
     </form>
   </dialog>
-  <script src="{{ url_for('static', filename='script.js') }}"></script>
+  <script src="{{ url_for('static', filename='script.js', v=asset_versions['script.js']) }}"></script>
 </body>
 </html>
